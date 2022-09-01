@@ -2,23 +2,27 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
 <style>
 p {
   text-align: center;
-  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 60px;
-  margin-top: 350px;
+  color: white;
 }
 </style>
 </head>
 <body>
-
+<div class="star"></div>
+<div class="star"></div>
+<div class="star"></div>
+<div class="star"></div>
 <p id="time"></p>
 
 <script>
 // Set the date we're counting down to
 var countDownDate = new Date("Nov 4, 2022 12:00:00").getTime();
-
+ 
 // Update the count down every 1 second
 var x = setInterval(function() {
 
