@@ -5,7 +5,7 @@ const contactContent = document.querySelector('#contact-content')
 
 about.addEventListener('click', () => {
     const aboutBox = new WinBox({
-        title: 'About Me',
+        title: 'about me',
         background: '#00aa00',
         width: '400px',
         height: '400px',
@@ -19,7 +19,7 @@ about.addEventListener('click', () => {
 
 contact.addEventListener('click', () => {
     const contactBox = new WinBox({
-        title: 'Contact',
+        title: 'contact',
         background: '#00aa00',
         width: '400px',
         height: '400px',
