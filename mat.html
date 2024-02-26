@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mat Schema</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #161b22;
+            color: #c9d1d9;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        #schedule {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            background-color: #161b22;
+        }
+
+        .day {
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: bold;
+            color: #58a6ff;
+            margin-bottom: 10px;
+        }
+
+        .meal {
+            font-size: 16px;
+            font-weight: bold;
+            margin-left: 20px;
+        }
+
+        .meal-input {
+            width: 100%; /* Changed width to 100% for responsiveness */
+            margin-bottom: 10px;
+            background-color: transparent;
+            border: none;
+            color: #c9d1d9;
+        }
+
+        .meal-input:focus {
+            outline: none;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #238636;
+            color: #c9d1d9;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: block;
+        }
+
+        button:hover {
+            background-color: #2ea44f;
+        }
+
+        @media only screen and (min-width: 768px) {
+            /* Adjustments for tablets and larger screens */
+            .meal-input {
+                width: 200px; /* Increase width for tablets and larger screens */
+            }
+        }
+
+        @media only screen and (min-width: 1024px) {
+            /* Adjustments for desktop screens */
+            #schedule {
+                max-width: 800px; /* Limit maximum width for better readability */
+                margin: 20px auto; /* Center the schedule on larger screens */
+            }
+        }
+
+        @media print {
+            /* Hide buttons when printing */
+            button {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        Vecka <span id="weekNumber"></span> Mat Schema
+    </header>
+    <main>
+        <section id="schedule"></section>
+        <button onclick="randomizeSchedule()">Randomisera</button>
+        <button onclick="printSchedule()">Skriv Ut</button>
+    </main>
+    <script>
+        const daysOfWeek = ['Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Söndag'];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            generateSchedule();
+            displayWeekNumber();
+        });
+
+        function generateSchedule() {
+            const meals = ['Pizza', 'Tacos', 'Sallad', 'Pasta', 'Burgare', 'Sushi', 'Curry']; // Lägg till fler läckra alternativ här!
+            
+            const scheduleContainer = document.getElementById('schedule');
+            scheduleContainer.innerHTML = ''; // Clear previous schedule
+            
+            daysOfWeek.forEach(day => {
+                const dayElement = document.createElement('div');
+                dayElement.classList.add('day');
+                
+                const dayHeading = document.createElement('h2');
+                dayHeading.textContent = day;
+                dayElement.appendChild(dayHeading);
+                
+                const mealInput = document.createElement('input');
+                mealInput.classList.add('meal-input');
+                mealInput.value = meals[Math.floor(Math.random() * meals.length)];
+                dayElement.appendChild(mealInput);
+                
+                scheduleContainer.appendChild(dayElement);
+            });
+        }
+
+        function randomizeSchedule() {
+            generateSchedule();
+        }
+
+        function printSchedule() {
+            window.print();
+        }
+
+        function displayWeekNumber() {
+            const currentDate = new Date();
+            const oneJan = new Date(currentDate.getFullYear(), 0, 1);
+            const weekNumber = Math.ceil((((currentDate - oneJan) / 86400000) + oneJan.getDay() + 1) / 7);
+            document.getElementById('weekNumber').textContent = weekNumber;
+        }
+    </script>
+</body>
+</html>
