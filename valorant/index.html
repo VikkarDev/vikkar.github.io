@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Match Tracker</title>
+</head>
+<body>
+
+  <div class="container dark-theme" id="container">
+    <h1>Match Tracker</h1>
+
+    <div class="theme-toggle">
+      <label for="darkThemeToggle">Dark Theme:</label>
+      <input type="checkbox" id="darkThemeToggle" onchange="toggleDarkTheme()">
+    </div>
+
+    <form id="matchForm">
+      <label for="hero">Hero:</label>
+      <select id="hero" required>
+        <option value="tracer">Tracer</option>
+        <option value="soldier76">Soldier: 76</option>
+        <option value="mercy">Mercy</option>
+        <!-- Add more hero options as needed -->
+      </select>
+
+      <label for="map">Map:</label>
+      <select id="map" required>
+        <option value="kings_row">King's Row</option>
+        <option value="hanamura">Hanamura</option>
+        <option value="volskaya">Volskaya Industries</option>
+        <!-- Add more map options as needed -->
+      </select>
+
+      <label for="kills">Kills:</label>
+      <input type="number" id="kills" required>
+
+      <label for="deaths">Deaths:</label>
+      <input type="number" id="deaths" required>
+
+      <label for="result">Result:</label>
+      <select id="result" required>
+        <option value="win">Win</option>
+        <option value="loss">Loss</option>
+      </select>
+
+      <button type="button" onclick="addMatch()">Add Match</button>
+    </form>
+
+    <div id="matchList">
+      <!-- Match details will be displayed here -->
+    </div>
+    <!-- Add this block to display statistics -->
+<div id="statistics">
+  <p id="totalMatches">Total Matches: 0</p>
+  <p id="totalKills">Total Kills: 0</p>
+  <p id="totalDeaths">Total Deaths: 0</p>
+  <p id="kdRatio">KD Ratio: 0.00</p>
+</div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #333; 
+  color: #fff; 
+}
+
+.container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #555; 
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+.theme-toggle {
+  margin-bottom: 15px;
+}
+
+label {
+  margin-bottom: 5px;
+  color: #fff; 
+}
+
+input,
+select {
+  margin-bottom: 15px;
+  padding: 8px;
+  background-color: #777; 
+  color: #fff; 
+}
+
+button {
+  background-color: #4caf50;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+#matchList {
+  margin-top: 20px;
+}
+
+.dark-theme #darkThemeToggle:checked + label {
+  color: #fff; 
+}
