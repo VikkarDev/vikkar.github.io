@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Sprite Sheet Maker — GIF → Sprite Sheet</title>
+<style>
+  body{max-width:1100px;margin:18px auto;padding:14px;font-family:system-ui,Segoe UI,Roboto,Arial;color:#111;}
+  h1{margin:0 0 12px;font-size:20px;}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+  .control{display:flex;flex-direction:column;gap:6px;margin:4px;}
+  label.small{font-size:12px;color:#444;}
+  input[type="number"],select,input[type="file"]{font-size:13px;padding:6px;}
+  button{padding:8px 12px;font-size:14px;cursor:pointer;}
+  canvas{display:block;margin-top:14px;border:1px solid #ddd;max-width:100%;}
+  #log{margin-top:10px;font-size:13px;color:#333;white-space:pre-wrap;}
+</style>
+</head>
+<body>
+<h1>Sprite Sheet Maker — GIF → PNG Sprite Sheet</h1>
+
+<div class="controls">
+  <div class="control">
+    <label class="small">Animated GIF</label>
+    <input id="file" type="file" accept="image/gif">
+  </div>
+  <div class="control">
+    <label class="small">Layout</label>
+    <select id="layout">
+      <option value="horizontal">Horizontal strip</option>
+      <option value="vertical">Vertical strip</option>
+      <option value="grid">Grid (columns)</option>
+    </select>
+  </div>
+  <div class="control">
+    <label class="small">Columns (grid)</label>
+    <input id="columns" type="number" min="1" value="6" style="width:86px">
+  </div>
+  <div class="control">
+    <label class="small">Tile width (0 = original)</label>
+    <input id="tileW" type="number" min="0" value="0" style="width:120px">
+  </div>
+  <div class="control">
+    <label class="small">Tile height (0 = original)</label>
+    <input id="tileH" type="number" min="0" value="0" style="width:120px">
+  </div>
+  <div class="control">
+    <label class="small">Resize mode</label>
+    <select id="resize">
+      <option value="none">none</option>
+      <option value="contain">contain</option>
+      <option value="cover">cover</option>
+    </select>
+  </div>
+  <div class="control">
+    <label class="small">Padding</label>
+    <input id="padding" type="number" min="0" value="0" style="width:86px">
+  </div>
+  <div class="control">
+    <label class="small">Margin</label>
+    <input id="margin" type="number" min="0" value="0" style="width:86px">
+  </div>
+  <div class="control" style="align-self:end;">
+    <button id="convert">Convert</button>
+  </div>
+  <div class="control" style="align-self:end;">
+    <a id="download" style="display:none">Download PNG</a>
+  </div>
+</div>
+
+<canvas id="canvas"></canvas>
+<div id="log"></div>
+
+<!-- omggif library -->
+<script src="https://cdn.jsdelivr.net/npm/omggif@1.0.10/omggif.js"></script>
+<script>
+const logEl = document.getElementById('log');
+function log(...args){ logEl.textContent = args.join(' '); }
+function formatBytes(bytes){
+  if(bytes<1024) return bytes+' B';
+  if(bytes<1024*1024) return (bytes/1024).toFixed(2)+' KiB';
+  return (bytes/(1024*1024)).toFixed(2)+' MiB';
+}
+function fitToTile(source,tileW,tileH,mode='none'){
+  if((!tileW&&!tileH)||mode==='none'){ if(source instanceof HTMLCanvasElement) return source;
+    const c=document.createElement('canvas'); c.width=source.width; c.height=source.height;
+    c.getContext('2d').drawImage(source,0,0); return c; }
+  const out=document.createElement('canvas'); out.width=tileW; out.height=tileH;
+  const ctx=out.getContext('2d'); ctx.clearRect(0,0,tileW,tileH);
+  const sw=source.width, sh=source.height, sar=sw/sh, tar=(tileW/tileH)||sar;
+  let dw=tileW, dh=tileH;
+  if(mode==='contain'){ if(sar>tar) dh=Math.round(tileW/sar); else dw=Math.round(tileH*sar);}
+  else if(mode==='cover'){ if(sar>tar) dw=Math.round(tileH*sar); else dh=Math.round(tileW/sar);}
+  const dx=Math.round((tileW-dw)/2), dy=Math.round((tileH-dh)/2);
+  ctx.drawImage(source,0,0,sw,sh,dx,dy,dw,dh);
+  return out;
+}
+
+// Extract all GIF frames using omggif
+async function extractGIFFrames(file){
+  const arrayBuffer = await file.arrayBuffer();
+  const byteArray = new Uint8Array(arrayBuffer);
+  const reader = new GifReader(byteArray);
+  const frames = [];
+  const w = reader.width, h = reader.height;
+  const prevCanvas = document.createElement('canvas');
+  prevCanvas.width = w; prevCanvas.height = h;
+  const prevCtx = prevCanvas.getContext('2d');
+
+  for(let i=0;i<reader.numFrames();i++){
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    const ctx = c.getContext('2d');
+
+    // copy previous canvas for disposal
+    ctx.drawImage(prevCanvas,0,0);
+
+    // decode current frame
+    const frameData = new Uint8ClampedArray(w*h*4);
+    reader.decodeAndBlitFrameRGBA(i, frameData);
+    const imageData = new ImageData(frameData, w, h);
+    ctx.putImageData(imageData,0,0);
+
+    // save this frame to prevCanvas
+    prevCtx.clearRect(0,0,w,h);
+    prevCtx.drawImage(c,0,0);
+
+    frames.push(c);
+  }
+  return frames;
+}
+
+// Fallback single-frame raster
+async function singleFrameRaster(file){
+  return new Promise((res,rej)=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement('canvas');
+      c.width=img.naturalWidth;c.height=img.naturalHeight;
+      c.getContext('2d').drawImage(img,0,0);
+      res([c]);
+    };
+    img.onerror=rej;
+    img.src=URL.createObjectURL(file);
+  });
+}
+
+async function extractFrames(file){
+  if(file.type==='image/gif'){
+    try{ const frames = await extractGIFFrames(file); log('GIF frames: '+frames.length); return frames; }
+    catch(e){ log('GIF extraction failed, fallback'); }
+  }
+  const frames = await singleFrameRaster(file);
+  log('Frames (fallback): '+frames.length); return frames;
+}
+
+function buildSpriteSheet(canvases,opts){
+  canvases=canvases.filter(c=>c.width>0&&c.height>0);
+  const n=canvases.length;
+  if(n===0) throw new Error('No valid frames');
+  const padding=opts.padding||0, margin=opts.margin||0;
+  const layout=opts.layout||'horizontal';
+  let columns=1;
+  if(layout==='horizontal') columns=n;
+  else if(layout==='vertical') columns=1;
+  else columns=Math.max(1,opts.columns||Math.ceil(Math.sqrt(n)));
+  const rows=Math.ceil(n/columns);
+  const tileW=opts.tileW||Math.max(...canvases.map(c=>c.width));
+  const tileH=opts.tileH||Math.max(...canvases.map(c=>c.height));
+  const finalW=margin*2+columns*tileW+(columns-1)*padding;
+  const finalH=margin*2+rows*tileH+(rows-1)*padding;
+  const canvas=document.getElementById('canvas'); canvas.width=finalW; canvas.height=finalH;
+  const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,finalW,finalH);
+  for(let i=0;i<n;i++){
+    const r=Math.floor(i/columns), c=i%columns;
+    const x=margin+c*(tileW+padding), y=margin+r*(tileH+padding);
+    const fitted=fitToTile(canvases[i],tileW,tileH,opts.resize);
+    ctx.drawImage(fitted,x,y);
+  }
+  return canvas;
+}
+
+function exportPNGDataURL(canvas){ return canvas.toDataURL('image/png'); }
+
+document.getElementById('convert').addEventListener('click',async ()=>{
+  const fileInput=document.getElementById('file');
+  const f=fileInput.files[0]; if(!f){ alert('Select a GIF'); return; }
+  try{
+    const frames=await extractFrames(f);
+    if(!frames.length) throw new Error('No frames extracted');
+
+    const layout=document.getElementById('layout').value;
+    const columns=parseInt(document.getElementById('columns').value)||1;
+    const tileWVal=parseInt(document.getElementById('tileW').value)||0;
+    const tileHVal=parseInt(document.getElementById('tileH').value)||0;
+    const resize=document.getElementById('resize').value;
+    const padding=parseInt(document.getElementById('padding').value)||0;
+    const margin=parseInt(document.getElementById('margin').value)||0;
+    const opts={layout,columns,tileW:tileWVal,tileH:tileHVal,resize,padding,margin};
+
+    const outCanvas=buildSpriteSheet(frames,opts);
+    log(`Sprite sheet: ${outCanvas.width}x${outCanvas.height}, frames: ${frames.length}, file size: ${formatBytes(f.size)}`);
+
+    const dl=document.getElementById('download');
+    dl.href=exportPNGDataURL(outCanvas);
+    const baseName=(f.name||'sprite').replace(/\.[^/.]+$/,'');
+    dl.download=`${baseName}-sprite.png`;
+    dl.style.display='inline-block';
+    dl.textContent=`Download ${dl.download}`;
+    outCanvas.scrollIntoView({behavior:'smooth'});
+  }catch(e){ console.error(e); log('Error: '+e.message); alert('Error: '+e.message); }
+});
+</script>
+</body>
+</html>
