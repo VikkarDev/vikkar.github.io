@@ -1,0 +1,1805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Higher or Lower - YouTube Views</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(74, 144, 226, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(138, 43, 226, 0.2) 0%, transparent 50%);
+            animation: pulse 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 900;
+            letter-spacing: -2px;
+            text-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .score {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .score-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 30px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .score-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-right: 8px;
+        }
+
+        .score-value {
+            color: #4ade80;
+            font-size: 2rem;
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 30px;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 30px 80px rgba(102, 126, 234, 0.4);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .card img {
+            width: 100%;
+            max-width: 360px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #fff;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .views {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 20px 0;
+            letter-spacing: -1px;
+        }
+
+        .views.hidden {
+            background: linear-gradient(135deg, #888 0%, #666 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            user-select: none;
+            font-size: 3rem;
+        }
+
+        .vs {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(240, 147, 251, 0.5);
+            animation: vsFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes vsFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 20px 50px;
+            font-size: 1.4rem;
+            font-weight: 800;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        .higher-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .higher-btn:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+        }
+
+        .lower-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .lower-btn:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(240, 147, 251, 0.5);
+        }
+
+        button:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button:disabled:hover {
+            transform: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .result {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 2rem;
+            font-weight: 900;
+            color: white;
+            min-height: 60px;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result.correct {
+            color: #4ade80;
+            text-shadow: 0 0 20px rgba(74, 222, 128, 0.5);
+        }
+
+        .result.wrong {
+            color: #f87171;
+            text-shadow: 0 0 20px rgba(248, 113, 113, 0.5);
+        }
+
+        .game-over {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 32px;
+            padding: 60px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .game-over h2 {
+            font-size: 3rem;
+            color: white;
+            margin-bottom: 30px;
+            font-weight: 900;
+        }
+
+        .game-over .final-score {
+            font-size: 5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 900;
+            margin-bottom: 40px;
+            letter-spacing: -2px;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 1.4rem;
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .vs {
+                transform: rotate(90deg);
+                font-size: 3rem;
+            }
+
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .card h2 {
+                font-size: 1rem;
+                min-height: 60px;
+            }
+
+            button {
+                padding: 15px 35px;
+                font-size: 1.1rem;
+            }
+
+            .score {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .game-over {
+                padding: 40px 20px;
+            }
+
+            .game-over .final-score {
+                font-size: 3.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 HIGHER OR LOWER</h1>
+            <div class="score">
+                <div class="score-item">
+                    <span class="score-label">Score</span>
+                    <span class="score-value" id="score">0</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Best</span>
+                    <span class="score-value" id="best">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="gameScreen">
+            <div class="game-area">
+                <div class="card">
+                    <img id="img1" src="" alt="">
+                    <h2 id="title1"></h2>
+                    <div class="views" id="views1"></div>
+                </div>
+
+                <div class="vs">VS</div>
+
+                <div class="card">
+                    <img id="img2" src="" alt="">
+                    <h2 id="title2"></h2>
+                    <div class="views hidden" id="views2">???</div>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button class="higher-btn" id="higherBtn">⬆️ Higher</button>
+                <button class="lower-btn" id="lowerBtn">⬇️ Lower</button>
+            </div>
+
+            <div class="result" id="result"></div>
+        </div>
+
+        <div id="gameOverScreen" class="game-over" style="display: none;">
+            <h2>🎯 Game Over!</h2>
+            <div class="final-score" id="finalScore"></div>
+            <button class="restart-btn" id="restartBtn">🔄 Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Hardcoded sample data
+        const videos = [
+    {
+        "title": "Canadian Reacts to The Animated History of Germany - Suibhne Reaction",
+        "id": "fmXSR3HJMjU",
+        "date": "2024-09-08T14:30:26Z",
+        "thumbnail": "https://i.ytimg.com/vi/fmXSR3HJMjU/maxresdefault.jpg",
+        "views": "1948",
+        "likes": "64",
+        "comments": "30"
+    },
+    {
+        "title": "Napoleon Crosses the Alps - Epic History Reaction",
+        "id": "4vehtZ_Jdss",
+        "date": "2024-08-09T17:01:49Z",
+        "thumbnail": "https://i.ytimg.com/vi/4vehtZ_Jdss/maxresdefault.jpg",
+        "views": "3317",
+        "likes": "103",
+        "comments": "18"
+    },
+    {
+        "title": "The German Revolution Part 2! - Things I Care About Reaction",
+        "id": "Ag1GsHrIiAE",
+        "date": "2024-07-20T14:00:08Z",
+        "thumbnail": "https://i.ytimg.com/vi/Ag1GsHrIiAE/maxresdefault.jpg",
+        "views": "504",
+        "likes": "16",
+        "comments": "1"
+    },
+    {
+        "title": "Napoleonic Wars: Battle of Eylau 1807 - Epic History TV Reaction",
+        "id": "CfOu4bPPoBU",
+        "date": "2024-07-18T17:45:00Z",
+        "thumbnail": "https://i.ytimg.com/vi/CfOu4bPPoBU/maxresdefault.jpg",
+        "views": "3685",
+        "likes": "96",
+        "comments": "25"
+    },
+    {
+        "title": "Napoleon Seizes Power - The Brumaire Coup - Epic History TV Reaction",
+        "id": "aBu8LRsGKlI",
+        "date": "2024-07-12T19:00:00Z",
+        "thumbnail": "https://i.ytimg.com/vi/aBu8LRsGKlI/maxresdefault.jpg",
+        "views": "3267",
+        "likes": "112",
+        "comments": "20"
+    },
+    {
+        "title": "Napoleon in Egypt: Battle of Aboukir 1799 - Epic History TV Reaction",
+        "id": "CPhyx_7srM4",
+        "date": "2024-07-09T16:00:09Z",
+        "thumbnail": "https://i.ytimg.com/vi/CPhyx_7srM4/maxresdefault.jpg",
+        "views": "1434",
+        "likes": "67",
+        "comments": "6"
+    },
+    {
+        "title": "Napoleon in Egypt: Battle of the Pyramids 1798   Epic History TV Reaction",
+        "id": "_L0NYCYz9GI",
+        "date": "2024-07-06T14:00:33Z",
+        "thumbnail": "https://i.ytimg.com/vi/_L0NYCYz9GI/maxresdefault.jpg",
+        "views": "1605",
+        "likes": "86",
+        "comments": "24"
+    },
+    {
+        "title": "We Actually Liked the Napoleon Film  - A Breakdown and Discussion",
+        "id": "qk0ol9ewv1g",
+        "date": "2023-11-26T16:15:02Z",
+        "thumbnail": "https://i.ytimg.com/vi/qk0ol9ewv1g/maxresdefault.jpg",
+        "views": "723",
+        "likes": "25",
+        "comments": "9"
+    },
+    {
+        "title": "Napoleon Endgame: France 1814 - Epic History TV Reaction",
+        "id": "CMdgR-jdcnQ",
+        "date": "2023-11-25T15:00:12Z",
+        "thumbnail": "https://i.ytimg.com/vi/CMdgR-jdcnQ/maxresdefault.jpg",
+        "views": "4125",
+        "likes": "115",
+        "comments": "22"
+    },
+    {
+        "title": "NAPOLEON TRAILER 2 - History Fan Official Trailer #2 Reaction!",
+        "id": "44q--9L2Jtc",
+        "date": "2023-10-23T17:30:00Z",
+        "thumbnail": "https://i.ytimg.com/vi/44q--9L2Jtc/maxresdefault.jpg",
+        "views": "1200",
+        "likes": "33",
+        "comments": "10"
+    },
+    {
+        "title": "Canadian Reacts to Geography Now! Israel",
+        "id": "Rb_LCXoD47M",
+        "date": "2023-10-14T14:00:12Z",
+        "thumbnail": "https://i.ytimg.com/vi/Rb_LCXoD47M/maxresdefault.jpg",
+        "views": "3383",
+        "likes": "99",
+        "comments": "24"
+    },
+    {
+        "title": "New Oversimplified?! The German Revolution (Part 1) - Things I Care About Reaction",
+        "id": "XIqYGmAGUAg",
+        "date": "2023-10-06T14:00:19Z",
+        "thumbnail": "https://i.ytimg.com/vi/XIqYGmAGUAg/maxresdefault.jpg",
+        "views": "1612",
+        "likes": "50",
+        "comments": "8"
+    },
+    {
+        "title": "The Civil War IN A Civil War?! | The Spanish Civil War (Part 2) | CallMeEzekiel Reaction",
+        "id": "RlUckX-x3Oo",
+        "date": "2023-10-04T15:45:01Z",
+        "thumbnail": "https://i.ytimg.com/vi/RlUckX-x3Oo/maxresdefault.jpg",
+        "views": "2250",
+        "likes": "97",
+        "comments": "4"
+    },
+    {
+        "title": "Napoleon 1813: Battle of the Nations   Epic History TV Reaction",
+        "id": "U-g49tGpJTs",
+        "date": "2023-09-23T17:00:16Z",
+        "thumbnail": "https://i.ytimg.com/vi/U-g49tGpJTs/maxresdefault.jpg",
+        "views": "3372",
+        "likes": "113",
+        "comments": "21"
+    },
+    {
+        "title": "Napoleon's First Campaign Ep5: Rivoli - Epic History TV Reaction",
+        "id": "2YvUUgK0Wi4",
+        "date": "2023-08-25T17:00:53Z",
+        "thumbnail": "https://i.ytimg.com/vi/2YvUUgK0Wi4/maxresdefault.jpg",
+        "views": "7130",
+        "likes": "161",
+        "comments": "35"
+    },
+    {
+        "title": "Canadian Reacts to Zhang Zongchang, the Dogmeat General - Sam O'Nella Reaction",
+        "id": "FXQuaBBh-Eg",
+        "date": "2023-08-06T12:00:10Z",
+        "thumbnail": "https://i.ytimg.com/vi/FXQuaBBh-Eg/maxresdefault.jpg",
+        "views": "2643",
+        "likes": "136",
+        "comments": "17"
+    },
+    {
+        "title": "The Secret (?) History of the 20th Century - Whatifalthist Reaction",
+        "id": "-CFS-yFOdkE",
+        "date": "2023-07-31T16:00:01Z",
+        "thumbnail": "https://i.ytimg.com/vi/-CFS-yFOdkE/maxresdefault.jpg",
+        "views": "1469",
+        "likes": "49",
+        "comments": "27"
+    },
+    {
+        "title": "Wellington's Triumph: Vitoria 1813 - Epic History TV Reaction",
+        "id": "KDZpFLcB-hg",
+        "date": "2023-07-27T18:30:17Z",
+        "thumbnail": "https://i.ytimg.com/vi/KDZpFLcB-hg/maxresdefault.jpg",
+        "views": "1817",
+        "likes": "77",
+        "comments": "8"
+    },
+    {
+        "title": "Napoleon 1813: The Road to Leipzig - Epic History TV Reaction",
+        "id": "GSRoqEkkCDQ",
+        "date": "2023-07-12T18:00:05Z",
+        "thumbnail": "https://i.ytimg.com/vi/GSRoqEkkCDQ/maxresdefault.jpg",
+        "views": "3035",
+        "likes": "98",
+        "comments": "20"
+    },
+    {
+        "title": "NAPOLEON - History Fan Official Trailer Reaction!",
+        "id": "XArEXDAQFeM",
+        "date": "2023-07-10T18:30:35Z",
+        "thumbnail": "https://i.ytimg.com/vi/XArEXDAQFeM/maxresdefault.jpg",
+        "views": "16735",
+        "likes": "476",
+        "comments": "95"
+    },
+    {
+        "title": "The ULTIMATE Left vs. Right Battle | The Spanish Civil War (Part 1) | CallMeEzekiel Reaction",
+        "id": "VU7E3tKBeP4",
+        "date": "2023-06-10T14:00:31Z",
+        "thumbnail": "https://i.ytimg.com/vi/VU7E3tKBeP4/maxresdefault.jpg",
+        "views": "8171",
+        "likes": "255",
+        "comments": "27"
+    },
+    {
+        "title": "Napoleon's First Campaign: The Bridge at Arcole - Epic History TV Reaction",
+        "id": "MuZDzpD6d5A",
+        "date": "2023-05-27T17:00:09Z",
+        "thumbnail": "https://i.ytimg.com/vi/MuZDzpD6d5A/maxresdefault.jpg",
+        "views": "4847",
+        "likes": "126",
+        "comments": "19"
+    },
+    {
+        "title": "The Forgotten?! Prologue To WW1: Balkan Wars 1912-1913 - The Great War Reaction",
+        "id": "PslOfG2ycxw",
+        "date": "2023-05-13T16:30:03Z",
+        "thumbnail": "https://i.ytimg.com/vi/PslOfG2ycxw/maxresdefault.jpg",
+        "views": "2359",
+        "likes": "90",
+        "comments": "17"
+    },
+    {
+        "title": "Reacting to the Voices of WW2 Leaders! VE Day Celebration!",
+        "id": "8ydW43dkLVY",
+        "date": "2023-05-08T17:31:01Z",
+        "thumbnail": "https://i.ytimg.com/vi/8ydW43dkLVY/maxresdefault.jpg",
+        "views": "3908",
+        "likes": "105",
+        "comments": "15"
+    },
+    {
+        "title": "Napoleon's Retreat from Moscow 1812 - Epic History TV Reaction",
+        "id": "BL02k30quCc",
+        "date": "2023-05-05T17:00:05Z",
+        "thumbnail": "https://i.ytimg.com/vi/BL02k30quCc/maxresdefault.jpg",
+        "views": "5719",
+        "likes": "170",
+        "comments": "36"
+    },
+    {
+        "title": "Canadian Reacts to Geography Now! Serbia",
+        "id": "RzIJv1mXi6A",
+        "date": "2023-04-15T16:00:30Z",
+        "thumbnail": "https://i.ytimg.com/vi/RzIJv1mXi6A/maxresdefault.jpg",
+        "views": "4095",
+        "likes": "118",
+        "comments": "43"
+    },
+    {
+        "title": "Napoleon's Bloodiest Day: Borodino - Epic History TV Reaction",
+        "id": "FOOyIh87gmw",
+        "date": "2023-04-13T16:00:09Z",
+        "thumbnail": "https://i.ytimg.com/vi/FOOyIh87gmw/maxresdefault.jpg",
+        "views": "3640",
+        "likes": "123",
+        "comments": "11"
+    },
+    {
+        "title": "Napoleon's Invasion of Russia 1812 (It Begins...) - Epic History TV Reaction",
+        "id": "rvqWntJp2u4",
+        "date": "2023-04-09T15:00:38Z",
+        "thumbnail": "https://i.ytimg.com/vi/rvqWntJp2u4/maxresdefault.jpg",
+        "views": "3769",
+        "likes": "114",
+        "comments": "29"
+    },
+    {
+        "title": "Frederick the Great - Extra History Reaction (Parts 2-3)",
+        "id": "LAzO8nZ5KeA",
+        "date": "2023-04-07T17:15:02Z",
+        "thumbnail": "https://i.ytimg.com/vi/LAzO8nZ5KeA/maxresdefault.jpg",
+        "views": "764",
+        "likes": "37",
+        "comments": "6"
+    },
+    {
+        "title": "Frederick the Great - Extra History Reaction (Part 1)",
+        "id": "8cBsT5V2yxk",
+        "date": "2023-04-05T18:30:05Z",
+        "thumbnail": "https://i.ytimg.com/vi/8cBsT5V2yxk/maxresdefault.jpg",
+        "views": "1622",
+        "likes": "56",
+        "comments": "8"
+    },
+    {
+        "title": "Wellington Strikes: Salamanca 1812 - Epic History TV Reaction",
+        "id": "UUBn5R0Rpic",
+        "date": "2023-04-01T16:00:15Z",
+        "thumbnail": "https://i.ytimg.com/vi/UUBn5R0Rpic/maxresdefault.jpg",
+        "views": "2002",
+        "likes": "78",
+        "comments": "9"
+    },
+    {
+        "title": "Napoleon's Spanish Ulcer: Spain 1809 - 1811 - Epic History TV Reaction",
+        "id": "yfSuQLW5tzI",
+        "date": "2023-03-25T16:00:38Z",
+        "thumbnail": "https://i.ytimg.com/vi/yfSuQLW5tzI/maxresdefault.jpg",
+        "views": "2420",
+        "likes": "84",
+        "comments": "22"
+    },
+    {
+        "title": "Napoleon's Revenge: Wagram 1809 - Epic History TV Reaction",
+        "id": "c9TlBGnAAQo",
+        "date": "2023-03-23T17:30:06Z",
+        "thumbnail": "https://i.ytimg.com/vi/c9TlBGnAAQo/maxresdefault.jpg",
+        "views": "1946",
+        "likes": "79",
+        "comments": "15"
+    },
+    {
+        "title": "Napoleon's First Campaign: Battle for Mantua - Epic History TV Reaction",
+        "id": "nEIA9KsYaxI",
+        "date": "2023-03-18T17:00:34Z",
+        "thumbnail": "https://i.ytimg.com/vi/nEIA9KsYaxI/maxresdefault.jpg",
+        "views": "3708",
+        "likes": "97",
+        "comments": "8"
+    },
+    {
+        "title": "How Family Structure Drives Ideology - Whatifalthist Reaction",
+        "id": "npWYtXrxvPE",
+        "date": "2023-03-16T17:00:24Z",
+        "thumbnail": "https://i.ytimg.com/vi/npWYtXrxvPE/maxresdefault.jpg",
+        "views": "6446",
+        "likes": "159",
+        "comments": "99"
+    },
+    {
+        "title": "1848: Europe's Year of Revolutions - Epic History TV Reaction",
+        "id": "ykza58f9NKo",
+        "date": "2023-03-14T18:00:23Z",
+        "thumbnail": "https://i.ytimg.com/vi/ykza58f9NKo/maxresdefault.jpg",
+        "views": "7218",
+        "likes": "165",
+        "comments": "50"
+    },
+    {
+        "title": "Canadian Reacts to Geography Now! Ukraine",
+        "id": "deBMslHwrqM",
+        "date": "2023-03-10T18:00:30Z",
+        "thumbnail": "https://i.ytimg.com/vi/deBMslHwrqM/maxresdefault.jpg",
+        "views": "8459",
+        "likes": "484",
+        "comments": "40"
+    },
+    {
+        "title": "Napoleon Defeated: Aspern 1809 - Epic History TV Reaction",
+        "id": "rjliXLm_40s",
+        "date": "2023-03-09T17:15:05Z",
+        "thumbnail": "https://i.ytimg.com/vi/rjliXLm_40s/maxresdefault.jpg",
+        "views": "1927",
+        "likes": "82",
+        "comments": "11"
+    },
+    {
+        "title": "Napoleon's Great Blunder: Spain 1808 - Epic History TV Reaction",
+        "id": "_iZuy1ad-sI",
+        "date": "2023-02-26T15:00:20Z",
+        "thumbnail": "https://i.ytimg.com/vi/_iZuy1ad-sI/maxresdefault.jpg",
+        "views": "3039",
+        "likes": "101",
+        "comments": "31"
+    },
+    {
+        "title": "Napoleon Defeats Russia: Friedland 1807 - Epic History TV Reaction",
+        "id": "Enwuot7jalQ",
+        "date": "2023-02-25T16:00:12Z",
+        "thumbnail": "https://i.ytimg.com/vi/Enwuot7jalQ/maxresdefault.jpg",
+        "views": "2895",
+        "likes": "101",
+        "comments": "11"
+    },
+    {
+        "title": "Canadian Reacts to Geography Now! Spain",
+        "id": "lGGmYmVAE-w",
+        "date": "2023-02-24T17:00:36Z",
+        "thumbnail": "https://i.ytimg.com/vi/lGGmYmVAE-w/maxresdefault.jpg",
+        "views": "24595",
+        "likes": "591",
+        "comments": "158"
+    },
+    {
+        "title": "What if Communism Never Existed - Whatifalthist Reaction",
+        "id": "amHlU37NAk0",
+        "date": "2023-02-21T18:15:00Z",
+        "thumbnail": "https://i.ytimg.com/vi/amHlU37NAk0/maxresdefault.jpg",
+        "views": "1524",
+        "likes": "55",
+        "comments": "28"
+    },
+    {
+        "title": "Canadian Reacts to What Even Is Europe? by Kraut",
+        "id": "yN08pjPxNZY",
+        "date": "2023-02-18T16:00:35Z",
+        "thumbnail": "https://i.ytimg.com/vi/yN08pjPxNZY/maxresdefault.jpg",
+        "views": "9975",
+        "likes": "335",
+        "comments": "82"
+    },
+    {
+        "title": "Napoleon Smashes Prussia: Jena 1806 - Epic History TV Reaction",
+        "id": "B2jWQAgwk54",
+        "date": "2023-02-12T15:00:07Z",
+        "thumbnail": "https://i.ytimg.com/vi/B2jWQAgwk54/maxresdefault.jpg",
+        "views": "3220",
+        "likes": "116",
+        "comments": "15"
+    },
+    {
+        "title": "Napoleon's First Victory: Siege of Toulon 1793 - Epic History TV Reaction",
+        "id": "qAbyDxrJwY8",
+        "date": "2023-02-10T17:00:39Z",
+        "thumbnail": "https://i.ytimg.com/vi/qAbyDxrJwY8/maxresdefault.jpg",
+        "views": "2407",
+        "likes": "84",
+        "comments": "19"
+    },
+    {
+        "title": "Napoleon's Masterpiece: Austerlitz 1805 - Epic History TV Reaction",
+        "id": "BzBAIm7_HI4",
+        "date": "2023-02-08T17:00:06Z",
+        "thumbnail": "https://i.ytimg.com/vi/BzBAIm7_HI4/maxresdefault.jpg",
+        "views": "4138",
+        "likes": "150",
+        "comments": "23"
+    },
+    {
+        "title": "The Loss of Life in WWI Visualized - RealLifeLore Reaction",
+        "id": "g7oOxulTBD8",
+        "date": "2023-02-02T17:00:24Z",
+        "thumbnail": "https://i.ytimg.com/vi/g7oOxulTBD8/maxresdefault.jpg",
+        "views": "2917",
+        "likes": "90",
+        "comments": "23"
+    },
+    {
+        "title": "WW1 Every Day With Army Sizes Reaction - Basically the Entire History of WW1 in ONE Video",
+        "id": "G9J44BaZ6Dg",
+        "date": "2023-01-28T17:30:02Z",
+        "thumbnail": "https://i.ytimg.com/vi/G9J44BaZ6Dg/maxresdefault.jpg",
+        "views": "2746",
+        "likes": "53",
+        "comments": "9"
+    },
+    {
+        "title": "Napoleon's First Campaign: Battle of Castiglione - Epic History TV Reaction",
+        "id": "Lo7RgzB8glo",
+        "date": "2023-01-27T21:00:09Z",
+        "thumbnail": "https://i.ytimg.com/vi/Lo7RgzB8glo/maxresdefault.jpg",
+        "views": "4653",
+        "likes": "129",
+        "comments": "23"
+    },
+    {
+        "title": "Napoleon's First Campaign: The Little Corporal - Epic History TV Reaction",
+        "id": "mnwbPwDX3vU",
+        "date": "2023-01-26T17:00:27Z",
+        "thumbnail": "https://i.ytimg.com/vi/mnwbPwDX3vU/maxresdefault.jpg",
+        "views": "5890",
+        "likes": "153",
+        "comments": "15"
+    },
+    {
+        "title": "Which Was the WORST WW1 Army to Fight in?! - The Front Reaction",
+        "id": "G-YEvC3oWxY",
+        "date": "2023-01-23T16:00:11Z",
+        "thumbnail": "https://i.ytimg.com/vi/G-YEvC3oWxY/maxresdefault.jpg",
+        "views": "934",
+        "likes": "27",
+        "comments": "4"
+    },
+    {
+        "title": "The Beginning of a Bright Future? The Last Human - Kurzgesagt Reaction",
+        "id": "GMc8rSzFw5I",
+        "date": "2023-01-20T15:00:07Z",
+        "thumbnail": "https://i.ytimg.com/vi/GMc8rSzFw5I/maxresdefault.jpg",
+        "views": "676",
+        "likes": "51",
+        "comments": "14"
+    },
+    {
+        "title": "Mass Hysteria Throughout History - Sam O'Nella Reaction",
+        "id": "M5K1Q6xfoEk",
+        "date": "2023-01-19T16:00:09Z",
+        "thumbnail": "https://i.ytimg.com/vi/M5K1Q6xfoEk/maxresdefault.jpg",
+        "views": "1619",
+        "likes": "124",
+        "comments": "13"
+    },
+    {
+        "title": "Civilizations of the Future! - Whatifalthist Reaction",
+        "id": "cc2i3iohe88",
+        "date": "2022-12-31T17:00:31Z",
+        "thumbnail": "https://i.ytimg.com/vi/cc2i3iohe88/maxresdefault.jpg",
+        "views": "1942",
+        "likes": "72",
+        "comments": "21"
+    },
+    {
+        "title": "Canadian Reacts to Geography Now! France",
+        "id": "3kl35mV2-Oc",
+        "date": "2022-12-29T17:00:02Z",
+        "thumbnail": "https://i.ytimg.com/vi/3kl35mV2-Oc/maxresdefault.jpg",
+        "views": "11758",
+        "likes": "311",
+        "comments": "82"
+    },
+    {
+        "title": "World War 1 - 1918 - Epic History TV History Fan Reaction",
+        "id": "QQaHkPmLZ5o",
+        "date": "2022-12-24T22:00:11Z",
+        "thumbnail": "https://i.ytimg.com/vi/QQaHkPmLZ5o/maxresdefault.jpg",
+        "views": "2097",
+        "likes": "65",
+        "comments": "15"
+    },
+    {
+        "title": "World War 1 - 1917 - Epic History TV History Fan Reaction",
+        "id": "-Vpewj_S-r4",
+        "date": "2022-12-22T19:00:00Z",
+        "thumbnail": "https://i.ytimg.com/vi/-Vpewj_S-r4/maxresdefault.jpg",
+        "views": "1901",
+        "likes": "66",
+        "comments": "3"
+    },
+    {
+        "title": "World War 1 - 1916 - Epic History TV History Fan Reaction",
+        "id": "twf2Nannnog",
+        "date": "2022-12-20T18:00:30Z",
+        "thumbnail": "https://i.ytimg.com/vi/twf2Nannnog/maxresdefault.jpg",
+        "views": "2320",
+        "likes": "75",
+        "comments": "21"
+    },
+    {
+        "title": "World War 1 - 1915 - Epic History TV History Fan Reaction",
+        "id": "k37FiDXmFY8",
+        "date": "2022-12-10T15:00:33Z",
+        "thumbnail": "https://i.ytimg.com/vi/k37FiDXmFY8/maxresdefault.jpg",
+        "views": "2443",
+        "likes": "82",
+        "comments": "14"
+    },
+    {
+        "title": "World War 1 - 1914 - Epic History TV History Fan Reaction",
+        "id": "TA4ThgneR3Y",
+        "date": "2022-12-08T17:00:29Z",
+        "thumbnail": "https://i.ytimg.com/vi/TA4ThgneR3Y/maxresdefault.jpg",
+        "views": "4221",
+        "likes": "124",
+        "comments": "19"
+    },
+    {
+        "title": "History Fan Reacts to FRENCH History Matters Videos!",
+        "id": "T-yZTxLFQ0U",
+        "date": "2022-12-03T16:30:05Z",
+        "thumbnail": "https://i.ytimg.com/vi/T-yZTxLFQ0U/maxresdefault.jpg",
+        "views": "3466",
+        "likes": "88",
+        "comments": "8"
+    },
+    {
+        "title": "How France Was Defeated By Germany! - Armchair Historian Reaction",
+        "id": "OV6LnQU52qk",
+        "date": "2022-12-02T17:00:23Z",
+        "thumbnail": "https://i.ytimg.com/vi/OV6LnQU52qk/maxresdefault.jpg",
+        "views": "2343",
+        "likes": "72",
+        "comments": "57"
+    },
+    {
+        "title": "What if Napoleon Never Rose To Power? - AlternateHistoryHub Reaction",
+        "id": "Nd1Awe6GYbQ",
+        "date": "2022-11-23T17:00:16Z",
+        "thumbnail": "https://i.ytimg.com/vi/Nd1Awe6GYbQ/maxresdefault.jpg",
+        "views": "1000",
+        "likes": "41",
+        "comments": "9"
+    },
+    {
+        "title": "History Fan Reacts to The Napoleonic Wars - Oversimplified (Part 2)",
+        "id": "sUGqXhVyUcI",
+        "date": "2022-11-20T15:00:28Z",
+        "thumbnail": "https://i.ytimg.com/vi/sUGqXhVyUcI/maxresdefault.jpg",
+        "views": "4065",
+        "likes": "140",
+        "comments": "27"
+    },
+    {
+        "title": "History Fan Reacts to The Napoleonic Wars - Oversimplified (Part 1)",
+        "id": "WmNVG5uZPUI",
+        "date": "2022-11-18T15:00:19Z",
+        "thumbnail": "https://i.ytimg.com/vi/WmNVG5uZPUI/maxresdefault.jpg",
+        "views": "4792",
+        "likes": "188",
+        "comments": "36"
+    },
+    {
+        "title": "History Fan Reacts to The French Revolution - Oversimplified (Part 2)",
+        "id": "bUmCyiSBlOo",
+        "date": "2022-11-12T15:00:23Z",
+        "thumbnail": "https://i.ytimg.com/vi/bUmCyiSBlOo/maxresdefault.jpg",
+        "views": "2693",
+        "likes": "118",
+        "comments": "23"
+    },
+    {
+        "title": "History Fan Reacts to The French Revolution - Oversimplified (Part 1)",
+        "id": "Ou2L91bXeBM",
+        "date": "2022-11-11T16:00:21Z",
+        "thumbnail": "https://i.ytimg.com/vi/Ou2L91bXeBM/maxresdefault.jpg",
+        "views": "2810",
+        "likes": "113",
+        "comments": "14"
+    },
+    {
+        "title": "World War...Zero? - The Seven Years' War - Feature History Reaction",
+        "id": "y0auEuyhgHU",
+        "date": "2022-11-09T19:49:57Z",
+        "thumbnail": "https://i.ytimg.com/vi/y0auEuyhgHU/maxresdefault.jpg",
+        "views": "1368",
+        "likes": "46",
+        "comments": "16"
+    },
+    {
+        "title": "The Hundreds Years' War (France's Most Important Conflict) - History Matters Reaction",
+        "id": "VW-ZNddM-HA",
+        "date": "2022-11-05T14:00:29Z",
+        "thumbnail": "https://i.ytimg.com/vi/VW-ZNddM-HA/maxresdefault.jpg",
+        "views": "1407",
+        "likes": "46",
+        "comments": "12"
+    },
+    {
+        "title": "Why Do Catholics & Protestants Dislike Each Other? - History Matters Reaction",
+        "id": "_8H0g9y1OdM",
+        "date": "2022-11-04T17:15:02Z",
+        "thumbnail": "https://i.ytimg.com/vi/_8H0g9y1OdM/maxresdefault.jpg",
+        "views": "1391",
+        "likes": "49",
+        "comments": "22"
+    },
+    {
+        "title": "Frances Greatest Leader? Charlemagne - HistoryMarche Reaction",
+        "id": "oyMm5v5e7pA",
+        "date": "2022-11-03T16:00:36Z",
+        "thumbnail": "https://i.ytimg.com/vi/oyMm5v5e7pA/maxresdefault.jpg",
+        "views": "1398",
+        "likes": "55",
+        "comments": "19"
+    },
+    {
+        "title": "The ENTIRE! History of France! - WonderWhy Reaction",
+        "id": "3bvqDNKamlo",
+        "date": "2022-10-30T18:00:01Z",
+        "thumbnail": "https://i.ytimg.com/vi/3bvqDNKamlo/maxresdefault.jpg",
+        "views": "8475",
+        "likes": "178",
+        "comments": "58"
+    },
+    {
+        "title": "Who Will Win Americas Next Civil War? - Whatifalthist Reaction",
+        "id": "l0MpS8MrI2Y",
+        "date": "2022-10-27T18:00:30Z",
+        "thumbnail": "https://i.ytimg.com/vi/l0MpS8MrI2Y/maxresdefault.jpg",
+        "views": "2449",
+        "likes": "78",
+        "comments": "52"
+    },
+    {
+        "title": "Canadian Test His Russian History Knowledge - What Do You Know About Russia?",
+        "id": "P3XARd9sP-Q",
+        "date": "2022-10-24T18:45:00Z",
+        "thumbnail": "https://i.ytimg.com/vi/P3XARd9sP-Q/maxresdefault.jpg",
+        "views": "1047",
+        "likes": "49",
+        "comments": "10"
+    },
+    {
+        "title": "Canadian Reacts to Geography Now! Russia",
+        "id": "tm6odLgpmjM",
+        "date": "2022-10-23T14:30:20Z",
+        "thumbnail": "https://i.ytimg.com/vi/tm6odLgpmjM/maxresdefault.jpg",
+        "views": "10209",
+        "likes": "298",
+        "comments": "71"
+    },
+    {
+        "title": "Fight for the Revolution! | The Russian Civil War 1918-1922 | CallMeEzekiel Reaction",
+        "id": "QmFnCHVIryA",
+        "date": "2022-10-20T18:30:23Z",
+        "thumbnail": "https://i.ytimg.com/vi/QmFnCHVIryA/maxresdefault.jpg",
+        "views": "3858",
+        "likes": "136",
+        "comments": "26"
+    },
+    {
+        "title": "Canadian Reacts to Russian Revolution - Oversimplified (Part 2!)",
+        "id": "JjGQGrnlyN0",
+        "date": "2022-10-18T18:30:11Z",
+        "thumbnail": "https://i.ytimg.com/vi/JjGQGrnlyN0/maxresdefault.jpg",
+        "views": "3263",
+        "likes": "124",
+        "comments": "15"
+    },
+    {
+        "title": "Canadian Reacts to Russian Revolution - Oversimplified (Part 1!)",
+        "id": "ahmyGkxMAYo",
+        "date": "2022-10-16T14:00:02Z",
+        "thumbnail": "https://i.ytimg.com/vi/ahmyGkxMAYo/maxresdefault.jpg",
+        "views": "4587",
+        "likes": "163",
+        "comments": "48"
+    },
+    {
+        "title": "Heroes or Villains? - The Decembrists (Part 2!) - Epic History TV Reaction",
+        "id": "0s2qfD4_qIE",
+        "date": "2022-10-13T18:30:03Z",
+        "thumbnail": "https://i.ytimg.com/vi/0s2qfD4_qIE/maxresdefault.jpg",
+        "views": "2500",
+        "likes": "77",
+        "comments": "11"
+    },
+    {
+        "title": "Russia's (FIRST?!) Revolution? - The Decembrists (Part 1!) - Epic History TV Reaction",
+        "id": "MMPMJaZztcg",
+        "date": "2022-10-11T18:00:07Z",
+        "thumbnail": "https://i.ytimg.com/vi/MMPMJaZztcg/maxresdefault.jpg",
+        "views": "3506",
+        "likes": "112",
+        "comments": "14"
+    },
+    {
+        "title": "Great Northern War (Parts 3-5!) - Extra Credits Reaction",
+        "id": "iEDB55SHVOk",
+        "date": "2022-10-09T14:00:27Z",
+        "thumbnail": "https://i.ytimg.com/vi/iEDB55SHVOk/maxresdefault.jpg",
+        "views": "1606",
+        "likes": "57",
+        "comments": "15"
+    },
+    {
+        "title": "When Sweden Fought Russia, Poland & Denmark - Great Northern War (Parts 1-2) Extra Credits Reaction",
+        "id": "NADwh5zjPko",
+        "date": "2022-10-08T14:00:10Z",
+        "thumbnail": "https://i.ytimg.com/vi/NADwh5zjPko/maxresdefault.jpg",
+        "views": "2780",
+        "likes": "110",
+        "comments": "27"
+    },
+    {
+        "title": "The History of Russia - Epic History TV Reaction (Part 2!)",
+        "id": "2pII8zDvg_o",
+        "date": "2022-09-30T18:00:03Z",
+        "thumbnail": "https://i.ytimg.com/vi/2pII8zDvg_o/maxresdefault.jpg",
+        "views": "6605",
+        "likes": "203",
+        "comments": "62"
+    },
+    {
+        "title": "The History of Russia - Epic History TV Reaction (Part 1!)",
+        "id": "LP-nwP6iqGw",
+        "date": "2022-09-28T16:00:25Z",
+        "thumbnail": "https://i.ytimg.com/vi/LP-nwP6iqGw/maxresdefault.jpg",
+        "views": "8614",
+        "likes": "250",
+        "comments": "85"
+    },
+    {
+        "title": "Does Italian History Repeat? - History Matters Reaction",
+        "id": "Sum93tRgewk",
+        "date": "2022-09-26T15:00:27Z",
+        "thumbnail": "https://i.ytimg.com/vi/Sum93tRgewk/maxresdefault.jpg",
+        "views": "1902",
+        "likes": "87",
+        "comments": "18"
+    },
+    {
+        "title": "The Video That Changed Everything For Me. J.J. McCullough Reaction",
+        "id": "UWKlZoyfMhE",
+        "date": "2022-09-24T15:00:18Z",
+        "thumbnail": "https://i.ytimg.com/vi/UWKlZoyfMhE/maxresdefault.jpg",
+        "views": "5336",
+        "likes": "184",
+        "comments": "76"
+    },
+    {
+        "title": "Shopping in the Soviet Union - The Cold War Reaction",
+        "id": "x4o5n5bJ0f0",
+        "date": "2022-09-22T18:00:18Z",
+        "thumbnail": "https://i.ytimg.com/vi/x4o5n5bJ0f0/maxresdefault.jpg",
+        "views": "760",
+        "likes": "41",
+        "comments": "10"
+    },
+    {
+        "title": "The Day Russian Democracy Died (Russia's FINAL Chance?) by NFKRZ Reaction",
+        "id": "xFuhP5FtSf8",
+        "date": "2022-09-16T16:15:02Z",
+        "thumbnail": "https://i.ytimg.com/vi/xFuhP5FtSf8/maxresdefault.jpg",
+        "views": "7165",
+        "likes": "231",
+        "comments": "44"
+    },
+    {
+        "title": "Russia was ALWAYS Doomed - The Origins of Russian Authoritarianism Reaction",
+        "id": "fPxy-GCPaIU",
+        "date": "2022-09-14T18:30:37Z",
+        "thumbnail": "https://i.ytimg.com/vi/fPxy-GCPaIU/maxresdefault.jpg",
+        "views": "6885",
+        "likes": "217",
+        "comments": "73"
+    },
+    {
+        "title": "Canadian Reacts to Geography Now! Sweden (Swedish ELECTION 2022 Special!)",
+        "id": "_0FGNkL8O-U",
+        "date": "2022-09-10T15:00:31Z",
+        "thumbnail": "https://i.ytimg.com/vi/_0FGNkL8O-U/maxresdefault.jpg",
+        "views": "10100",
+        "likes": "265",
+        "comments": "100"
+    },
+    {
+        "title": "Canadian Reacts to Prohibition by Oversimplified",
+        "id": "d-PFyxDS8AI",
+        "date": "2022-09-09T15:00:22Z",
+        "thumbnail": "https://i.ytimg.com/vi/d-PFyxDS8AI/maxresdefault.jpg",
+        "views": "3728",
+        "likes": "154",
+        "comments": "22"
+    },
+    {
+        "title": "How the Internet Will Completely Change the World - Whatifalthist Reaction",
+        "id": "dz1SDsE0fH4",
+        "date": "2022-09-07T18:30:36Z",
+        "thumbnail": "https://i.ytimg.com/vi/dz1SDsE0fH4/maxresdefault.jpg",
+        "views": "2223",
+        "likes": "77",
+        "comments": "38"
+    },
+    {
+        "title": "Canadian Reacts to The First Punic War - Oversimplified (Part 2)",
+        "id": "HhDvQLEI-5Y",
+        "date": "2022-09-04T11:31:30Z",
+        "thumbnail": "https://i.ytimg.com/vi/HhDvQLEI-5Y/maxresdefault.jpg",
+        "views": "7625",
+        "likes": "331",
+        "comments": "42"
+    },
+    {
+        "title": "Canadian Reacts to The First Punic War - Oversimplified (Part 1)",
+        "id": "ohXJXkfvFKs",
+        "date": "2022-09-03T11:00:21Z",
+        "thumbnail": "https://i.ytimg.com/vi/ohXJXkfvFKs/maxresdefault.jpg",
+        "views": "11757",
+        "likes": "400",
+        "comments": "53"
+    },
+    {
+        "title": "Canadian Reacts to The Dumbest Russian Voyage Nobody Talks About by BlueJay",
+        "id": "_3tlgP-ziRY",
+        "date": "2022-08-29T18:30:25Z",
+        "thumbnail": "https://i.ytimg.com/vi/_3tlgP-ziRY/maxresdefault.jpg",
+        "views": "16207",
+        "likes": "656",
+        "comments": "89"
+    },
+    {
+        "title": "The Election That RUINED Everything? (Was it Really That Bad?) AlternateHistoryHub Reaction",
+        "id": "Oi2_dF9wxUw",
+        "date": "2022-08-27T15:00:11Z",
+        "thumbnail": "https://i.ytimg.com/vi/Oi2_dF9wxUw/maxresdefault.jpg",
+        "views": "2428",
+        "likes": "79",
+        "comments": "26"
+    },
+    {
+        "title": "Canadian Reacts to Geography Now! Germany",
+        "id": "PgmSSRX68BI",
+        "date": "2022-08-25T16:00:21Z",
+        "thumbnail": "https://i.ytimg.com/vi/PgmSSRX68BI/maxresdefault.jpg",
+        "views": "4273",
+        "likes": "206",
+        "comments": "46"
+    },
+    {
+        "title": "Canadian Reacts to History of the Entire World, I Guess by Bill Wurtz",
+        "id": "T2_FXdwrnhg",
+        "date": "2022-08-24T15:00:14Z",
+        "thumbnail": "https://i.ytimg.com/vi/T2_FXdwrnhg/maxresdefault.jpg",
+        "views": "2461",
+        "likes": "119",
+        "comments": "32"
+    },
+    {
+        "title": "Why was the USSR So Terrible? History Matters Reaction",
+        "id": "zZNLEjOGFHI",
+        "date": "2022-08-13T15:00:44Z",
+        "thumbnail": "https://i.ytimg.com/vi/zZNLEjOGFHI/maxresdefault.jpg",
+        "views": "2517",
+        "likes": "93",
+        "comments": "31"
+    },
+    {
+        "title": "WHY was Germany SO EFFECTIVE in WW2?! Knowledgia Reaction",
+        "id": "oVurN6aJEEU",
+        "date": "2022-08-12T16:36:02Z",
+        "thumbnail": "https://i.ytimg.com/vi/oVurN6aJEEU/maxresdefault.jpg",
+        "views": "694",
+        "likes": "35",
+        "comments": "14"
+    },
+    {
+        "title": "Canadian Reacts to How Canada Could End by J.J. McCullough",
+        "id": "4o3x8OMVbCI",
+        "date": "2022-08-09T15:30:01Z",
+        "thumbnail": "https://i.ytimg.com/vi/4o3x8OMVbCI/maxresdefault.jpg",
+        "views": "2482",
+        "likes": "110",
+        "comments": "68"
+    },
+    {
+        "title": "Canadian Reacts to The Pig War by Oversimplified (Part 2)",
+        "id": "6q-i_OMVSlc",
+        "date": "2022-07-26T17:30:31Z",
+        "thumbnail": "https://i.ytimg.com/vi/6q-i_OMVSlc/maxresdefault.jpg",
+        "views": "5761",
+        "likes": "220",
+        "comments": "26"
+    },
+    {
+        "title": "Canadian Reacts to The Pig War by Oversimplified (Part 1)",
+        "id": "bnoH4Dym--A",
+        "date": "2022-07-24T18:30:40Z",
+        "thumbnail": "https://i.ytimg.com/vi/bnoH4Dym--A/maxresdefault.jpg",
+        "views": "6856",
+        "likes": "242",
+        "comments": "14"
+    },
+    {
+        "title": "Canadian Reacts to History of the United States, I guess",
+        "id": "qMMF8nCoH4g",
+        "date": "2022-07-17T19:15:02Z",
+        "thumbnail": "https://i.ytimg.com/vi/qMMF8nCoH4g/maxresdefault.jpg",
+        "views": "2569",
+        "likes": "82",
+        "comments": "33"
+    },
+    {
+        "title": "What Happened to German Soldiers AFTER! WW2? - Armchair Historian Reaction",
+        "id": "q_HEPRSQxgc",
+        "date": "2022-07-13T17:15:02Z",
+        "thumbnail": "https://i.ytimg.com/vi/q_HEPRSQxgc/maxresdefault.jpg",
+        "views": "1992",
+        "likes": "69",
+        "comments": "13"
+    },
+    {
+        "title": "Will Our World and Age COLLAPSE?! Very Soon? (Not Quite) - Whatifalthist Reaction",
+        "id": "7SDHpWxAzJ4",
+        "date": "2022-07-09T18:37:15Z",
+        "thumbnail": "https://i.ytimg.com/vi/7SDHpWxAzJ4/maxresdefault.jpg",
+        "views": "1544",
+        "likes": "67",
+        "comments": "53"
+    },
+    {
+        "title": "Is Europe Better Because of the EU? History of the EU - Geo History Reaction",
+        "id": "xAt7oWnvqY0",
+        "date": "2022-07-07T17:15:02Z",
+        "thumbnail": "https://i.ytimg.com/vi/xAt7oWnvqY0/maxresdefault.jpg",
+        "views": "2104",
+        "likes": "71",
+        "comments": "38"
+    },
+    {
+        "title": "The Future (COLLAPSE?) of Europe?! Whatifalthist Reaction",
+        "id": "D8HBfly62nA",
+        "date": "2022-07-02T15:00:07Z",
+        "thumbnail": "https://i.ytimg.com/vi/D8HBfly62nA/maxresdefault.jpg",
+        "views": "4837",
+        "likes": "152",
+        "comments": "158"
+    },
+    {
+        "title": "Canadian Debunks 50 \"Facts\" About Canada",
+        "id": "2JIathzCfBc",
+        "date": "2022-07-01T16:00:01Z",
+        "thumbnail": "https://i.ytimg.com/vi/2JIathzCfBc/maxresdefault.jpg",
+        "views": "395",
+        "likes": "15",
+        "comments": "10"
+    },
+    {
+        "title": "Why is the World Crazy Now? Whatifalthist Reaction",
+        "id": "spWsV_-Nr9U",
+        "date": "2022-06-30T16:30:14Z",
+        "thumbnail": "https://i.ytimg.com/vi/spWsV_-Nr9U/maxresdefault.jpg",
+        "views": "2919",
+        "likes": "96",
+        "comments": "61"
+    },
+    {
+        "title": "Canadian Reacts to Geography Now! Canada",
+        "id": "XObFnszDdEI",
+        "date": "2022-06-25T16:45:03Z",
+        "thumbnail": "https://i.ytimg.com/vi/XObFnszDdEI/maxresdefault.jpg",
+        "views": "2826",
+        "likes": "113",
+        "comments": "22"
+    },
+    {
+        "title": "The WW2 Battle Fought In...America? Simple History Reaction",
+        "id": "Kd8PizaEFJA",
+        "date": "2022-06-21T18:30:30Z",
+        "thumbnail": "https://i.ytimg.com/vi/Kd8PizaEFJA/maxresdefault.jpg",
+        "views": "637",
+        "likes": "40",
+        "comments": "2"
+    },
+    {
+        "title": "Canadian Reacts to The Fallen of World War II",
+        "id": "sdzksWUj39E",
+        "date": "2022-06-19T15:05:01Z",
+        "thumbnail": "https://i.ytimg.com/vi/sdzksWUj39E/maxresdefault.jpg",
+        "views": "11798",
+        "likes": "423",
+        "comments": "101"
+    },
+    {
+        "title": "Canadian Reacts to The Cold War - OverSimplified (Part 2)",
+        "id": "Gb-DgH4kmjU",
+        "date": "2022-06-17T14:00:07Z",
+        "thumbnail": "https://i.ytimg.com/vi/Gb-DgH4kmjU/maxresdefault.jpg",
+        "views": "2584",
+        "likes": "108",
+        "comments": "18"
+    },
+    {
+        "title": "Canadian Reacts to The Cold War - OverSimplified (Part 1)",
+        "id": "0cdtfeVNku8",
+        "date": "2022-06-14T17:30:00Z",
+        "thumbnail": "https://i.ytimg.com/vi/0cdtfeVNku8/maxresdefault.jpg",
+        "views": "3825",
+        "likes": "141",
+        "comments": "12"
+    },
+    {
+        "title": "FDR's Plan To Divide Germany (Was it a Better Plan?!) - Whatifalthist Reaction",
+        "id": "ihmXM7YptcY",
+        "date": "2022-06-12T15:00:21Z",
+        "thumbnail": "https://i.ytimg.com/vi/ihmXM7YptcY/maxresdefault.jpg",
+        "views": "1539",
+        "likes": "56",
+        "comments": "18"
+    },
+    {
+        "title": "What if Germany Had Been Split Differently After WWII - AlternateHistoryHub Reaction",
+        "id": "24eMQVWVobo",
+        "date": "2022-06-11T15:30:00Z",
+        "thumbnail": "https://i.ytimg.com/vi/24eMQVWVobo/maxresdefault.jpg",
+        "views": "2693",
+        "likes": "117",
+        "comments": "14"
+    },
+    {
+        "title": "How Did This Happen?! HOW did Germany Get So Strong After WW1? - Armchair Historian Reaction",
+        "id": "i7GyEv7pWiM",
+        "date": "2022-06-09T18:30:38Z",
+        "thumbnail": "https://i.ytimg.com/vi/i7GyEv7pWiM/maxresdefault.jpg",
+        "views": "769",
+        "likes": "37",
+        "comments": "8"
+    },
+    {
+        "title": "Wars of the 2020s and 30s by Whatifalthist Reaction",
+        "id": "RzWdRNP_cHU",
+        "date": "2022-06-07T18:45:01Z",
+        "thumbnail": "https://i.ytimg.com/vi/RzWdRNP_cHU/maxresdefault.jpg",
+        "views": "3666",
+        "likes": "118",
+        "comments": "60"
+    },
+    {
+        "title": "Canadian Reacts to AlternateHistoryHub's OTHER CANADA TALES!",
+        "id": "oS5Np5akTHU",
+        "date": "2022-06-05T14:00:31Z",
+        "thumbnail": "https://i.ytimg.com/vi/oS5Np5akTHU/maxresdefault.jpg",
+        "views": "1536",
+        "likes": "60",
+        "comments": "13"
+    },
+    {
+        "title": "(A Terrifying World) What if Germany WON World War 2? PART 4 - AlternateHistoryHub Reaction",
+        "id": "GY8hahVvJRs",
+        "date": "2022-06-02T18:30:12Z",
+        "thumbnail": "https://i.ytimg.com/vi/GY8hahVvJRs/maxresdefault.jpg",
+        "views": "776",
+        "likes": "39",
+        "comments": "17"
+    },
+    {
+        "title": "(No Coming Back?) WHAT IF Germany WON World War 2?! PART 3 - AlternateHistoryHub Reaction",
+        "id": "6HvGx4nCTJU",
+        "date": "2022-05-31T18:30:05Z",
+        "thumbnail": "https://i.ytimg.com/vi/6HvGx4nCTJU/maxresdefault.jpg",
+        "views": "993",
+        "likes": "55",
+        "comments": "9"
+    },
+    {
+        "title": "What if Germany WON WW2?! (Does it Get Worse or Better?) Part 2- AlternateHistoryHub Reaction",
+        "id": "avoKdQ59B7I",
+        "date": "2022-05-29T14:00:01Z",
+        "thumbnail": "https://i.ytimg.com/vi/avoKdQ59B7I/maxresdefault.jpg",
+        "views": "1258",
+        "likes": "61",
+        "comments": "21"
+    },
+    {
+        "title": "What if Germany WON WW2?! (End of the World?) - AlternateHistoryHub Reaction",
+        "id": "DPKGDfgyGK8",
+        "date": "2022-05-28T16:00:07Z",
+        "thumbnail": "https://i.ytimg.com/vi/DPKGDfgyGK8/maxresdefault.jpg",
+        "views": "2292",
+        "likes": "78",
+        "comments": "22"
+    },
+    {
+        "title": "A Study of Decadence (The Fall of the West?) - Whatifalthist Reaction",
+        "id": "tTHkm02OSJw",
+        "date": "2022-05-24T18:00:24Z",
+        "thumbnail": "https://i.ytimg.com/vi/tTHkm02OSJw/maxresdefault.jpg",
+        "views": "5118",
+        "likes": "128",
+        "comments": "84"
+    },
+    {
+        "title": "Take HIM (You Know Who I Mean) OUT! - The Infographics Show Reaction",
+        "id": "BC9ruB0gRnI",
+        "date": "2022-05-23T18:30:09Z",
+        "thumbnail": "https://i.ytimg.com/vi/BC9ruB0gRnI/maxresdefault.jpg",
+        "views": "366",
+        "likes": "17",
+        "comments": "4"
+    },
+    {
+        "title": "Nazis on...Drugs? Nazis on Crystal Meth - World War Two Reaction",
+        "id": "GxhFDbFdKq4",
+        "date": "2022-05-20T18:30:21Z",
+        "thumbnail": "https://i.ytimg.com/vi/GxhFDbFdKq4/maxresdefault.jpg",
+        "views": "928",
+        "likes": "42",
+        "comments": "12"
+    },
+    {
+        "title": "Germany Could Not Win WW2 Reaction (Sorry HoI4 Players) PART 2 - Potential History",
+        "id": "U47kv7qEumM",
+        "date": "2022-05-17T19:15:00Z",
+        "thumbnail": "https://i.ytimg.com/vi/U47kv7qEumM/maxresdefault.jpg",
+        "views": "4694",
+        "likes": "173",
+        "comments": "46"
+    },
+    {
+        "title": "Germany Could Not Win WW2 Reaction (No Matter What) PART 1 - Potential History",
+        "id": "14MEQwxHPE8",
+        "date": "2022-05-16T18:30:01Z",
+        "thumbnail": "https://i.ytimg.com/vi/14MEQwxHPE8/maxresdefault.jpg",
+        "views": "5269",
+        "likes": "225",
+        "comments": "36"
+    },
+    {
+        "title": "WW2 Every Day With Army Sizes Reaction - Basically the Entire History of WW2 in ONE Video",
+        "id": "QaKotHo96GU",
+        "date": "2022-05-14T18:00:14Z",
+        "thumbnail": "https://i.ytimg.com/vi/QaKotHo96GU/maxresdefault.jpg",
+        "views": "11806",
+        "likes": "261",
+        "comments": "52"
+    },
+    {
+        "title": "Oversimplified Hitler Reaction PART 2!",
+        "id": "DAh0tbstJRI",
+        "date": "2022-05-13T18:30:08Z",
+        "thumbnail": "https://i.ytimg.com/vi/DAh0tbstJRI/maxresdefault.jpg",
+        "views": "2158",
+        "likes": "85",
+        "comments": "14"
+    },
+    {
+        "title": "The BANNED, INFAMOUS Oversimplified Video! Hitler (Part 1) Reaction",
+        "id": "QJe_JuTjW8Q",
+        "date": "2022-05-11T18:30:32Z",
+        "thumbnail": "https://i.ytimg.com/vi/QJe_JuTjW8Q/maxresdefault.jpg",
+        "views": "3664",
+        "likes": "140",
+        "comments": "17"
+    },
+    {
+        "title": "Is WW3 REALLY About To Start? (Probably Not) - Whatifalthist Reaction Video",
+        "id": "h9bUI29WgJQ",
+        "date": "2022-05-09T19:00:22Z",
+        "thumbnail": "https://i.ytimg.com/vi/h9bUI29WgJQ/maxresdefault.jpg",
+        "views": "3415",
+        "likes": "130",
+        "comments": "77"
+    },
+    {
+        "title": "Canadian Reacts to CANADIAN History Matters Videos!",
+        "id": "amSfvVgDkjc",
+        "date": "2022-05-07T16:30:00Z",
+        "thumbnail": "https://i.ytimg.com/vi/amSfvVgDkjc/maxresdefault.jpg",
+        "views": "3796",
+        "likes": "114",
+        "comments": "13"
+    },
+    {
+        "title": "A Complete History of World War 1 in Countryballs - Reaction",
+        "id": "9xNZ46YUGnA",
+        "date": "2022-05-03T18:30:46Z",
+        "thumbnail": "https://i.ytimg.com/vi/9xNZ46YUGnA/maxresdefault.jpg",
+        "views": "1057",
+        "likes": "38",
+        "comments": "5"
+    },
+    {
+        "title": "The Borders of the 22nd Century? - Whatifalthist Reaction",
+        "id": "W_-8iB4g8sk",
+        "date": "2022-04-30T18:30:20Z",
+        "thumbnail": "https://i.ytimg.com/vi/W_-8iB4g8sk/maxresdefault.jpg",
+        "views": "5956",
+        "likes": "174",
+        "comments": "83"
+    },
+    {
+        "title": "Canadian Reacts AGAIN to WW2 PART 2 - Oversimplified",
+        "id": "uqIMzxkFH0c",
+        "date": "2022-04-29T17:30:11Z",
+        "thumbnail": "https://i.ytimg.com/vi/uqIMzxkFH0c/maxresdefault.jpg",
+        "views": "4886",
+        "likes": "176",
+        "comments": "28"
+    },
+    {
+        "title": "FIRST TIME WATCHING OVERSIMPLIFIED - History Fan Reacts to WW2 - Oversimplified",
+        "id": "pA_z5sFwnVQ",
+        "date": "2022-04-27T17:00:30Z",
+        "thumbnail": "https://i.ytimg.com/vi/pA_z5sFwnVQ/maxresdefault.jpg",
+        "views": "5583",
+        "likes": "192",
+        "comments": "29"
+    },
+    {
+        "title": "Canadian Reacts to How Canada Will Fall",
+        "id": "j4plTWf4HMM",
+        "date": "2022-04-24T18:45:00Z",
+        "thumbnail": "https://i.ytimg.com/vi/j4plTWf4HMM/maxresdefault.jpg",
+        "views": "8291",
+        "likes": "295",
+        "comments": "178"
+    }
+];
+
+        let currentVideo = null;
+        let nextVideo = null;
+        let score = 0;
+        let bestScore = localStorage.getItem('bestScore') || 0;
+        let usedVideos = [];
+
+        document.getElementById('best').textContent = bestScore;
+
+        function startGame() {
+            document.getElementById('gameScreen').style.display = 'block';
+            document.getElementById('gameOverScreen').style.display = 'none';
+            score = 0;
+            usedVideos = [];
+            updateScore();
+            loadNewRound();
+        }
+
+        function getRandomVideo() {
+            if (usedVideos.length >= videos.length) {
+                usedVideos = [];
+            }
+            
+            let availableVideos = videos.filter(v => !usedVideos.includes(v));
+            let video = availableVideos[Math.floor(Math.random() * availableVideos.length)];
+            usedVideos.push(video);
+            return video;
+        }
+
+        function loadNewRound() {
+            if (nextVideo) {
+                currentVideo = nextVideo;
+            } else {
+                currentVideo = getRandomVideo();
+            }
+            nextVideo = getRandomVideo();
+
+            const img1 = document.getElementById('img1');
+            img1.alt = currentVideo.title;
+            img1.src = currentVideo.thumbnail;
+            
+            document.getElementById('title1').textContent = currentVideo.title;
+            document.getElementById('views1').textContent = formatViews(currentVideo.views);
+            document.getElementById('views1').classList.remove('hidden');
+
+            const img2 = document.getElementById('img2');
+            img2.alt = nextVideo.title;
+            img2.src = nextVideo.thumbnail;
+            
+            document.getElementById('title2').textContent = nextVideo.title;
+            document.getElementById('views2').textContent = '???';
+            document.getElementById('views2').classList.add('hidden');
+
+            document.getElementById('result').textContent = '';
+            document.getElementById('result').className = 'result';
+            document.getElementById('higherBtn').disabled = false;
+            document.getElementById('lowerBtn').disabled = false;
+        }
+
+        function formatViews(views) {
+            const num = parseInt(views);
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M views';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K views';
+            }
+            return num + ' views';
+        }
+
+        function checkAnswer(guess) {
+            document.getElementById('higherBtn').disabled = true;
+            document.getElementById('lowerBtn').disabled = true;
+
+            const currentViews = parseInt(currentVideo.views);
+            const nextViews = parseInt(nextVideo.views);
+
+            document.getElementById('views2').textContent = formatViews(nextViews);
+            document.getElementById('views2').classList.remove('hidden');
+
+            let correct = false;
+            if (guess === 'higher' && nextViews >= currentViews) {
+                correct = true;
+            } else if (guess === 'lower' && nextViews <= currentViews) {
+                correct = true;
+            }
+
+            const resultEl = document.getElementById('result');
+            if (correct) {
+                score++;
+                updateScore();
+                resultEl.textContent = '✅ CORRECT!';
+                resultEl.className = 'result correct';
+                setTimeout(loadNewRound, 1500);
+            } else {
+                resultEl.textContent = '❌ WRONG!';
+                resultEl.className = 'result wrong';
+                setTimeout(gameOver, 2000);
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+            if (score > bestScore) {
+                bestScore = score;
+                localStorage.setItem('bestScore', bestScore);
+                document.getElementById('best').textContent = bestScore;
+            }
+        }
+
+        function gameOver() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('gameOverScreen').style.display = 'block';
+            document.getElementById('finalScore').textContent = score + ' POINTS';
+        }
+
+        document.getElementById('higherBtn').addEventListener('click', () => checkAnswer('higher'));
+        document.getElementById('lowerBtn').addEventListener('click', () => checkAnswer('lower'));
+        document.getElementById('restartBtn').addEventListener('click', startGame);
+
+        // Start the game immediately
+        startGame();
+    </script>
+</body>
+</html>
