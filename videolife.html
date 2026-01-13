@@ -172,6 +172,16 @@
             background-clip: text;
             margin: 20px 0;
             letter-spacing: -1px;
+            transition: all 0.1s ease-out;
+        }
+
+        .views.counting {
+            animation: pulse 0.1s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .views.hidden {
@@ -1721,8 +1731,11 @@
             img1.src = currentVideo.thumbnail;
             
             document.getElementById('title1').textContent = currentVideo.title;
-            document.getElementById('views1').textContent = formatViews(currentVideo.views);
-            document.getElementById('views1').classList.remove('hidden');
+            
+            // Animate views loading for first card
+            const views1El = document.getElementById('views1');
+            views1El.classList.remove('hidden');
+            animateViews(views1El, parseInt(currentVideo.views));
 
             const img2 = document.getElementById('img2');
             img2.alt = nextVideo.title;
@@ -1736,6 +1749,26 @@
             document.getElementById('result').className = 'result';
             document.getElementById('higherBtn').disabled = false;
             document.getElementById('lowerBtn').disabled = false;
+        }
+
+        function animateViews(element, targetViews) {
+            const duration = 1000; // 1 second
+            const steps = 50;
+            const increment = targetViews / steps;
+            let current = 0;
+            let step = 0;
+
+            const interval = setInterval(() => {
+                step++;
+                current += increment;
+                
+                if (step >= steps) {
+                    current = targetViews;
+                    clearInterval(interval);
+                }
+                
+                element.textContent = formatViews(Math.floor(current));
+            }, duration / steps);
         }
 
         function formatViews(views) {
@@ -1755,8 +1788,10 @@
             const currentViews = parseInt(currentVideo.views);
             const nextViews = parseInt(nextVideo.views);
 
-            document.getElementById('views2').textContent = formatViews(nextViews);
-            document.getElementById('views2').classList.remove('hidden');
+            // Animate the reveal of second video's views
+            const views2El = document.getElementById('views2');
+            views2El.classList.remove('hidden');
+            animateViews(views2El, nextViews);
 
             let correct = false;
             if (guess === 'higher' && nextViews >= currentViews) {
@@ -1765,18 +1800,21 @@
                 correct = true;
             }
 
-            const resultEl = document.getElementById('result');
-            if (correct) {
-                score++;
-                updateScore();
-                resultEl.textContent = '✅ CORRECT!';
-                resultEl.className = 'result correct';
-                setTimeout(loadNewRound, 1500);
-            } else {
-                resultEl.textContent = '❌ WRONG!';
-                resultEl.className = 'result wrong';
-                setTimeout(gameOver, 2000);
-            }
+            // Wait for animation to finish before showing result
+            setTimeout(() => {
+                const resultEl = document.getElementById('result');
+                if (correct) {
+                    score++;
+                    updateScore();
+                    resultEl.textContent = '✅ CORRECT!';
+                    resultEl.className = 'result correct';
+                    setTimeout(loadNewRound, 1500);
+                } else {
+                    resultEl.textContent = '❌ WRONG!';
+                    resultEl.className = 'result wrong';
+                    setTimeout(gameOver, 2000);
+                }
+            }, 1000);
         }
 
         function updateScore() {
