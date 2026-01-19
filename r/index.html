@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recipe Printer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header>
+      <div>
+        <p class="eyebrow">From kitchen notes to the paper</p>
+        <h1>Recipe Creator</h1>
+      </div>
+      <div class="header-actions">
+        <button id="print-btn" type="button">Print Recipes</button>
+        <button id="share-btn" type="button" class="ghost">Copy share link</button>
+        <span id="share-status" class="share-status" aria-live="polite"></span>
+      </div>
+    </header>
+
+    <section class="panel form-panel">
+      <h2>Capture a recipe</h2>
+      <form id="recipe-form">
+        <label>
+          Recipe name
+          <input name="title" type="text" placeholder="Mom's lemon chicken" required />
+        </label>
+        <label>
+          Category
+          <input name="category" type="text" placeholder="Dinner" />
+        </label>
+        <label>
+          Ingredients (one per line)
+          <textarea name="ingredients" rows="4" placeholder="2 chicken breasts"></textarea>
+        </label>
+        <label>
+          Directions / Notes
+          <textarea
+            name="instructions"
+            rows="5"
+            placeholder="Season chicken, sear, and finish in the oven."
+          ></textarea>
+        </label>
+        <div class="form-actions">
+          <button type="reset" class="ghost">Clear</button>
+          <button type="submit">Save recipe</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel list-panel">
+      <div class="panel-header">
+        <h2>Saved recipes</h2>
+        <button id="clear-btn" type="button" class="ghost">Remove all</button>
+      </div>
+      <div id="recipe-list" class="recipe-list" aria-live="polite"></div>
+    </section>
+  </main>
+  <script src="script.js" defer></script>
+</body>
+</html>
